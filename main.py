@@ -142,7 +142,7 @@ def train_nn(sess, step, batch_size, get_batches_fn, train_op, cross_entropy_los
     for image, label in (get_batches_fn(batch_size)):
         _, loss = sess.run(
             [train_op, cross_entropy_loss], feed_dict={input_image: image, correct_label: label,
-                                                       keep_prob: 1.0, learning_rate: 1e-4})
+                                                       keep_prob: 1.0, learning_rate: 0.00007})
         print('Epoch: {} loss: {:.3f}'.format(step + 1, loss))
         
     if saver:
@@ -155,16 +155,17 @@ def train_nn(sess, step, batch_size, get_batches_fn, train_op, cross_entropy_los
 
 
 def run():
-    batches = 13
-    epochs = 80
+    batches = 25 #13
+    epochs = 1
     restore_model = True
-    training = True
+    # training = True
+    training = False
     compute_iou = True
     save_inference_samples = True
     do_exteranl_tests = False
     save_graph = True
 
-    image_shape = (160, 576)
+    image_shape = (256,512)#(160, 576)
     data_dir = './data'
     runs_dir = './runs'
     # Change following to switch datasets
@@ -215,11 +216,14 @@ def run():
                 elapsed = timeit.default_timer() - start_time
                 print('Epoch: {} loss: {:.3f} time: {:.3f}'.format(step + 1, loss, elapsed))
     
+            # if (step+1)%25 ==0:
             if save_inference_samples:
+                start_time_inf = timeit.default_timer()
                 print("Saving inference samples...")
                 dataset.save_inference_samples(
                     runs_dir, sess, logits, keep_prob, input_image)
-
+                elapsed_inf = timeit.default_timer() - start_time_inf
+                print('time taken to save inference: {:.3f}'.format(elapsed_inf))
         #compute mean_iou on traning images
         if compute_iou:
             print("Computing IOU...")
